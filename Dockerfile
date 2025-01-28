@@ -2,31 +2,33 @@
 # FROM debian:9-slim as base
 FROM debian:stable-slim AS base
 
+# install dependencies
+RUN apt-get update && \
+    apt-get install -y git mediainfo make curl gcc g++ clang nasm yasm \
+    opencl-dev vim libass-dev uuid-dev zlib1g-dev 
 
+# TODO: Попробовать обновить FFmpeg.
 ENV FFMPEG_VERSION=4.0.2 LD_LIBRARY_PATH=/usr/local/lib
 
-RUN apt-get update
-
-# install mediainfo executable
-RUN apt-get install -y mediainfo
-
-# build ffmpeg libraries
-RUN apt-get install -y make curl gcc g++ nasm yasm && \
-  apt-get install -y opencl-dev vim libass-dev libavformat-dev \
-  libavutil-dev libavfilter-dev uuid-dev zlib1g-dev && \
-  DIR=$(mktemp -d) && cd ${DIR} && \
-  curl -s http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz | tar zxvf - -C . && \
-  cd ffmpeg-${FFMPEG_VERSION} && \
-  ./configure  --enable-version3 --enable-hardcoded-tables --enable-shared --enable-static \
-    --enable-small --enable-libass --enable-postproc --enable-avresample --enable-libfreetype \
-    --disable-lzma --enable-opencl --enable-pthreads && \
-  make && \
-  make install && \
-  make distclean && \
-  rm -rf ${DIR}
+# build ffmpeg libraries    
+RUN DIR=$(mktemp -d) && cd ${DIR} && \
+    # Изначально здесь была ссылка на HTTP, но сейчас архивы доступны по HTTPS.
+    # curl -s http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz | \
+    curl -s https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz | \
+    tar zxvf - -C . && \
+    cd ffmpeg-${FFMPEG_VERSION} && \
+    ./configure  --enable-version3 --enable-hardcoded-tables --enable-shared \
+    --enable-static --enable-small --enable-libass --enable-postproc \
+    --enable-avresample --enable-libfreetype --disable-lzma --enable-opencl \
+    --enable-pthreads && \
+    # Ускорение сборки.
+    # make && \
+    make -j$(nproc) && \
+    make install && \
+    make distclean && \
+    rm -rf ${DIR}
 
 # install git, make, and gcc to build gpac
-RUN apt-get install -y git && apt-get install -y make && apt-get install -y gcc && apt-get install -y clang
 COPY .git/ /app/.git/
 
 # pull and build gpac
@@ -52,6 +54,7 @@ FROM debian:stable-slim AS slim
 
 ENV FFMPEG_VERSION=4.0.2 LD_LIBRARY_PATH=/usr/local/lib
 
+# TODO: Вот это не очень красиво. Приходится руками всё отслеживать.
 COPY --from=base /app/caption-inspector /usr/local/bin/
 # copy required libraries from base to the slim image
 COPY --from=base /usr/local/lib/libavformat.so.* /usr/local/lib/
@@ -101,6 +104,11 @@ COPY --from=base /usr/lib/x86_64-linux-gnu/libkrb5support.so.* /usr/local/lib/
 COPY --from=base /lib/x86_64-linux-gnu/libkeyutils.so.* /usr/local/lib/
 COPY --from=base /usr/lib/x86_64-linux-gnu/libsasl2.so.* /usr/local/lib/
 COPY --from=base /usr/lib/x86_64-linux-gnu/libffi.so.* /usr/local/lib/
+COPY --from=base /usr/lib/x86_64-linux-gnu/libldap-2.5.so.* /usr/local/lib/
+COPY --from=base /usr/lib/x86_64-linux-gnu/liblber-2.5.so.* /usr/local/lib/
+COPY --from=base /usr/lib/x86_64-linux-gnu/libbrotlidec.so.* /usr/local/lib/
+COPY --from=base /usr/lib/x86_64-linux-gnu/libcrypto.so.* /usr/local/lib/
+COPY --from=base /usr/lib/x86_64-linux-gnu/libbrotlicommon.so.* /usr/local/lib/
 
 # ensure all required libraries are installed
 RUN if ldd /usr/local/bin/mediainfo | grep "not found"; then false; fi

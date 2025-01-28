@@ -55,6 +55,8 @@ FROM debian:stable-slim AS slim
 ENV FFMPEG_VERSION=4.0.2 LD_LIBRARY_PATH=/usr/local/lib
 
 # TODO: Вот это не очень красиво. Приходится руками всё отслеживать.
+# TODO: Можно сделать более кросс-платформенный вариант, если заменить x86_64 
+# на константу, как это сделано в форке svlobanov.
 COPY --from=base /app/caption-inspector /usr/local/bin/
 # copy required libraries from base to the slim image
 COPY --from=base /usr/local/lib/libavformat.so.* /usr/local/lib/

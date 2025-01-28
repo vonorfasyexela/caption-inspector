@@ -77,10 +77,13 @@ make ci_with_gpac
 
 Building and Running Caption Inspector in a Docker Container
 ------------------------------------------------------------
-Obviously you need docker running on your local machine to build. Building inside of a docker image will remove the need
-to install any dependencies, but comes at the expense of a slightly more complicated command line execution. Another advantage
-of building Caption Inspector inside of the Docker Container is that it seamlessly integrates MOV support. All of the steps above
-to pull the GPAC library, build it, and then link it to Caption Inspector are done automagically in the Docker File.
+Obviously you need docker running on your local machine to build. Building 
+inside of a docker image will remove the need to install any dependencies, 
+but comes at the expense of a slightly more complicated command line execution. 
+Another advantage of building Caption Inspector inside of the Docker Container 
+is that it seamlessly integrates MOV support. All of the steps above to pull 
+the GPAC library, build it, and then link it to Caption Inspector are done 
+automagically in the Docker File.
 
 ```
 make docker
@@ -90,10 +93,12 @@ docker run -tv $(pwd):/files caption-inspector -o /files /files/test/media/Plan9
 docker run -tv $(pwd):/files caption-inspector -o /files /files/test/media/NightOfTheLivingDead.mcc
 ```
 
-In the `docker run` command, your current working directory will be remapped to `/files` inside of the container, so
-you will need to prefix your input and output paths to that so that it can place the files in the correct spot. For
-this example, the output file is located in the current directory `./` and the input file is located in a directory
-underneath the current directory, specifically `./test/media/*`.
+In the `docker run` command, your current working directory will be remapped 
+to `/files` inside of the container, so you will need to prefix your input and 
+output paths to that so that it can place the files in the correct spot. For
+this example, the output file is located in the current directory `./` and 
+the input file is located in a directory underneath the current directory, 
+specifically `./test/media/*`.
 
 Regression Testing the Caption Inspector Executable
 ---------------------------------------------------

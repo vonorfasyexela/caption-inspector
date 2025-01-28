@@ -1,4 +1,7 @@
-FROM debian:9-slim as base
+# Обновил версию образа и исправил регистр слова AS.
+# FROM debian:9-slim as base
+FROM debian:stable-slim AS base
+
 
 ENV FFMPEG_VERSION=4.0.2 LD_LIBRARY_PATH=/usr/local/lib
 
@@ -43,7 +46,9 @@ RUN ldd /usr/bin/mediainfo
 #
 # Runtime Container
 #
-FROM debian:9-slim as slim
+# Обновил версию образа и исправил регистр слова AS.
+# FROM debian:9-slim as slim
+FROM debian:stable-slim AS slim
 
 ENV FFMPEG_VERSION=4.0.2 LD_LIBRARY_PATH=/usr/local/lib
 
